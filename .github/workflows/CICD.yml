@@ -120,7 +120,7 @@ jobs:
             export DOCKER_IMAGE=${{ secrets.DOCKER_USERNAME }}/test-server:latest
             cd /home/ubuntu/scripts
             ./rolling-update.sh
-            cd /docker-app
+            cd docker-app
             docker-compose down
             docker-compose pull
             docker-compose up -d
