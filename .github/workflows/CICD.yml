@@ -106,6 +106,6 @@ jobs:
           key: ${{ secrets.REMOTE_PRIVATE_KEY }} # ec2 instance pem key
           port: ${{ secrets.REMOTE_SSH_PORT }} # 접속포트
           script: | # 실행할 스크립트
-            export DOCKER_IMAGE=${{ steps.build-image.outputs.image }}
+            export DOCKER_IMAGE=hyeonda02/test-server:latest
             cd /home/ubuntu/scripts
             ./rolling-update.sh
