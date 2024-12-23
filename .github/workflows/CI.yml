@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Checkout
       - uses: actions/checkout@v4
-    
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -29,9 +29,7 @@ jobs:
       - name: Get short SHA
         id: slug
         run: echo "sha7=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
-        
-      - name: Generate application.properties
-        
+
+
       - name: Build with Gradle Wrapper
         run: ./gradlew build
-
