@@ -6,7 +6,7 @@ on:
       - develop
 
 env:
-  DOCKERHUB_REPOSITORY: test-server
+  DOCKERHUB_REPOSITORY: ${{ secrets.DOCKER_REPOSITORY }}
 
 jobs:
   CI:
@@ -14,6 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+
+    services:
+      mongo:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: test
+          MONGO_INITDB_ROOT_PASSWORD: testPW
 
     steps:
       - name: Get short SHA
@@ -30,8 +39,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build with Gradle Wrapper
-        run: ./gradlew build
+      - name: Build and Test with Gradle Wrapper
+        run: |
+          export SPRING_DATA_MONGODB_URI=mongodb://test:testPW@localhost:27017/testdb
+          ./gradlew build test
 
       - name: Upload jar file to Artifact
         uses: actions/upload-artifact@v4
@@ -101,11 +112,14 @@ jobs:
       - name: Executing remote ssh commands
         uses: appleboy/ssh-action@v0.1.6 # ssh 접속하는 오픈소스
         with:
-          host: ${{ secrets.REMOTE_IP }} # 인스턴스 IP
-          username: ${{ secrets.REMOTE_USER }} # 우분투 아이디
-          key: ${{ secrets.REMOTE_PRIVATE_KEY }} # ec2 instance pem key
-          port: ${{ secrets.REMOTE_SSH_PORT }} # 접속포트
-          script: | # 실행할 스크립트
-            export DOCKER_IMAGE=hyeonda02/test-server:latest
+          host: ${{ secrets.REMOTE_IP }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.REMOTE_PRIVATE_KEY }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+          script: | 
+            export DOCKER_IMAGE=${{ secrets.DOCKER_USERNAME }}/test-server:latest
             cd /home/ubuntu/scripts
             ./rolling-update.sh
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d
